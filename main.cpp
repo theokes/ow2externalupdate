@@ -27,10 +27,10 @@ auto url = skCrypt("https://keyauth.win/api/1.2/"); */
 
 void MainThread() {
 	using namespace OW;
-	std::cout << "Launch in Main Menu and go to Practice Range..\n";
+	std::cout << "Open game and in Main Menu go to Practice Range..\n";
 	while (!SDK->Initialize() || !SDK->GetGlobalKey())
 	{
-		std::cout << "Waiting Overwatch..\n";
+		std::cout << "Waiting for Overwatch..\n";
 		Sleep(2000);
 	}
 
@@ -79,7 +79,7 @@ int main()
 	if (!OW::Config::loginornot) MainThread();
 	std::string consoleTitle = (std::string)skCrypt("Loader - Built at:  ") + compilation_date + " " + compilation_time;
 	SetConsoleTitleA(consoleTitle.c_str());
-	std::cout << skCrypt("\n\nConnecting to server..");
+	std::cout << skCrypt("\n\nLoading..");
 	/*KeyAuthApp.init();
 
 	if (!KeyAuthApp.data.success)
