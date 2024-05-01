@@ -61,14 +61,14 @@ namespace OW {
 		{
 			return spoof_call((PVOID)(this->dwGameBase + 0x1D21D0C), reinterpret_cast<uint64_t(__fastcall*)(uint64_t*, uint64_t*)>(this->dwGameBase + 0xB2DE0), a2, a1); //48 8b 89 ? ? ? ? e9 ? ? ? ? 83 ff + D, 48 89 74 24 ? 57 48 8b f2 48 8b f9
 		}
-		bool GetGlobalKey() {
-			static auto key_sig = (BYTE*)"\xFF\xFF\xFF\xFF\xFF\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00";
-			static auto key_mask = "xxxxxxxx????????????????????x???";
+		inline bool GetGlobalKey() {
+			static auto key_sig = (BYTE*)"\x00\x00\x00\x00\x21\x00\x00\x00\x00\x00\x00\x00\x24\x00\x00\x00\x01\x00\x00\x00\x29\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00";
+			static auto key_mask = "xxxxxxxxxxxxx?xxxxxxxxxxxxxxxxxxxxxxxx";
 			while (true) {
 				uint64_t Key = FindPatternExReg(key_sig, key_mask, 0x100000);
-				if (Key && Key < 0xf000000000000000 && RPM<uint64_t>(Key - 0xF0) > 0x100000000000000 && RPM<uint64_t>(Key - 0x78) > 0x100000000000000) {
-					GlobalKey1 = RPM<uint64_t>(Key - 0xF0);
-					GlobalKey2 = RPM<uint64_t>(Key - 0x78);
+				if (Key && Key < 0xf000000000000000 && RPM<uint64_t>(Key + 0x38) > 0x1000000000000000 && RPM<uint64_t>(Key + 0xB8) > 0x1000000000000000) {
+					GlobalKey1 = RPM<uint64_t>(Key + 0x38);
+					GlobalKey2 = RPM<uint64_t>(Key + 0xB8);
 					printf("GlobalKey1: 0x%llx\n", GlobalKey1);
 					printf("GlobalKey2: 0x%llx\n", GlobalKey2);
 					return true;

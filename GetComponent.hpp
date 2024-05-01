@@ -303,71 +303,73 @@ namespace OW {
 	uintptr_t DecryptComponent(uintptr_t parent, uint8_t idx) {
 		__try {
 			if (parent) {
-				unsigned __int64 v1 = parent;
-				unsigned __int64 v2 = (uintptr_t)1 << (uintptr_t)(idx & 0x3F);
-				unsigned __int64 v3 = v2 - 1;
-				unsigned __int64 v4 = idx & 0x3F;
-				unsigned __int64 v5 = idx / 0x3F;
-				unsigned __int64 v6 = SDK->RPM<uintptr_t>((v1 + 8 * (uint32_t)v5 + 0x110));
-				unsigned __int64 v7 = (v2 & SDK->RPM<uintptr_t>((v1 + 8 * (uint32_t)v5 + 0x110))) >> v4;
-				unsigned __int64 v8 = (v3 & v6) - (((v3 & v6) >> 1) & 0x5555555555555555);
-				unsigned __int64 v9 = SDK->RPM<uintptr_t>((SDK->RPM<uintptr_t>((v1 + 0x80)) + 8 * (SDK->RPM<uint8_t>(((uint32_t)v5 + v1 + 0x130)) + ((0x101010101010101 * (((v8 & 0x3333333333333333) + ((v8 >> 2) & 0x3333333333333333) + (((v8 & 0x3333333333333333) + ((v8 >> 2) & 0x3333333333333333)) >> 4)) & 0xF0F0F0F0F0F0F0F)) >> 0x38))));
-				unsigned __int64 Key1 = SDK->GlobalKey1;
-				unsigned __int64 Key2 = SDK->GlobalKey2;
-				auto dummy = SDK->RPM<_QWORD>(SDK->dwGameBase + 0x3904B20 + (Key1 >> 0x34));
-				auto dummy2 = SDK->RPM<_QWORD>(SDK->dwGameBase + 0x3904B20 + (Key1 & 0xFFF));
-				unsigned __int64 v10 = (unsigned int)v9 | v9 & 0xFFFFFFFF00000000ui64 ^ ((unsigned __int64)((unsigned int)dummy - (unsigned int)v9) << 0x20);
-				unsigned __int64 v11 = (unsigned int)Key2 ^ (unsigned int)v9 | (Key2 ^ ((unsigned int)v10 | v10 & 0xFFFFFFFF00000000ui64 ^ ((unsigned __int64)((unsigned int)v10 ^ (unsigned int)~HIDWORD(dummy2)) << 0x20))) & 0xFFFFFFFF00000000ui64 ^ (((unsigned int)Key2 ^ (unsigned int)v10 ^ 0xFFFFFFFFE58C31FEui64) << 0x20);
-				unsigned __int64 v12 = -(int)v7 & ((unsigned int)v11 | v11 & 0xFFFFFFFF00000000ui64 ^ ((unsigned __int64)(unsigned int)(HIDWORD(dummy) - v11) << 0x20));
-				return v12;
+
+				uintptr_t v1 = parent;
+				uintptr_t v2 = (uintptr_t)1 << (uintptr_t)(idx & 0x3F);
+				uintptr_t v3 = v2 - 1;
+				uintptr_t v4 = idx & 0x3F;
+				uintptr_t v5 = idx / 0x3F;
+				uintptr_t v6 = SDK->RPM<uintptr_t>((v1 + 8 * (uint32_t)v5 + 0x110));
+				uintptr_t v7 = (v2 & SDK->RPM<uintptr_t>((v1 + 8 * (uint32_t)v5 + 0x110))) >> v4;
+				uintptr_t v8 = (v3 & v6) - (((v3 & v6) >> 1) & 0x5555555555555555);
+				uintptr_t v9 = SDK->RPM<uintptr_t>((SDK->RPM<uintptr_t>((v1 + 0x80)) + 8 * (SDK->RPM<uint8_t>(((uint32_t)v5 + v1 + 0x130)) + ((0x101010101010101 * (((v8 & 0x3333333333333333) + ((v8 >> 2) & 0x3333333333333333) + (((v8 & 0x3333333333333333) + ((v8 >> 2) & 0x3333333333333333)) >> 4)) & 0xF0F0F0F0F0F0F0F)) >> 0x38))));
+				uintptr_t key1 = SDK->GlobalKey1;
+				uintptr_t key2 = SDK->GlobalKey2;
+
+				uintptr_t dummy1 = SDK->RPM<uintptr_t>(SDK->dwGameBase + 0x383CB20 + (key1 >> 0x34));
+				uintptr_t dummy2 = SDK->RPM<uintptr_t>(SDK->dwGameBase + 0x383CB20 + (key1 & 0xFFF));
+				uintptr_t v10 = (unsigned int)v9 | v9 & 0xFFFFFFFF00000000ui64 ^ ((unsigned __int64)(2 * __ROR4__(dummy2, 3) - (unsigned int)v9) << 0x20);;
+				uintptr_t v11 = key2 ^ ((unsigned int)v10 | v10 & 0xFFFFFFFF00000000ui64 ^ ((unsigned __int64)(0x837BDC34 - (unsigned int)v10) << 0x20));
+				uintptr_t v12 = (unsigned int)v11 | v11 & 0xFFFFFFFF00000000ui64 ^ ((unsigned __int64)(unsigned int)(v11 + __ROL4__(dummy1, 1)) << 0x20);
+				uintptr_t v13 = -(int)v7 & ((unsigned int)v12 | v12 & 0xFFFFFFFF00000000ui64 ^ (((unsigned int)v12 ^ HIDWORD(dummy2)) << 0x20));
+				return v13;
 			}
 		}
 		__except (EXCEPTION_EXECUTE_HANDLER) {}
 		return NULL;
 	}
 
-	unsigned __int64 __fastcall DecryptVis(__int64 a1) {
-		__int64 v1; // rsi
-		unsigned __int64 v2; // rbx
-		unsigned __int64 v3; // r9
-		__int64 v4; // rsi
-		unsigned __int64 v5; // rdx
-		unsigned __int64 v6; // rcx
-		__m128i v7; // xmm1
-		__m128i v8; // xmm2
-		__m128i v9; // xmm0
-		__m128i v10; // xmm1
-		v1 = a1;
-		v2 = SDK->dwGameBase + offset::VisFN;
+	inline unsigned __int64 __fastcall DecryptVis(unsigned __int64 a1)
+	{
+		unsigned __int64 v2 = 0; // rdi
+		unsigned __int64 v3 = 0; // r8
+		__int64 v4 = 0; // rbx
+		unsigned __int64 v5 = 0; // rcx
+		unsigned __int64 v6 = 0; // rax
+		unsigned __int64 v7 = 0; // rax
+		__m128i v8; // xmm1
+		__m128i v9; // xmm2
+		__m128i v10; // xmm0
+		__m128i v11; // xmm1
+
+		v2 = (SDK->dwGameBase + offset::VisFN);
 		v3 = v2 + 0x8;
-		v4 = SDK->RPM<uint64_t>(SDK->dwGameBase + 0x3905B40
-			+ 8 * (((uint8_t)a1 + 0x5E) & 0x7F)
-			+ (((uint64_t)(a1 - offset::Vis_Key) >> 7) & 7)) ^ v2 ^ (a1 - offset::Vis_Key);
-		v5 = (v3 - v2 + 7) >> 3;
-		v6 = 0i64;
+		v4 = SDK->RPM<_QWORD>(SDK->dwGameBase + 0x383DB40 + 8ull * (((uint8_t)a1 + 9) & 0x7F)
+			+ (((unsigned __int64)(a1 - offset::Vis_Key) >> 7) & 7)) ^ v2 ^ (a1 - offset::Vis_Key);
+		v5 = 0i64;
+		v6 = (v3 - v2 + 7) >> 3;
 		if (v2 > v3)
-			v5 = 0i64;
-		if (v5) {
-			if (v5 >= 4) {
-				ZeroMemory(&v7, sizeof(v7));
-				ZeroMemory(&v8, sizeof(v8));
-				do {
-					v6 += 4i64;
-					v7 = _mm_xor_si128(v7, _mm_loadu_si128((const __m128i*)v2));
-					v9 = _mm_loadu_si128((const __m128i*)(v2 + 16));
-					v2 += 32i64;
-					v8 = _mm_xor_si128(v8, v9);
-				} while (v6 < (v5 & 0xFFFFFFFFFFFFFFFCui64));
-				v10 = _mm_xor_si128(v7, v8);
-				auto addr = _mm_xor_si128(v10, _mm_srli_si128(v10, 8));
-				v4 ^= *(__int64*)&addr;
-			}
+			v6 = 0i64;
+		if (v6 >= 4)
+		{
+			v7 = v6 & 0xFFFFFFFFFFFFFFFCui64;
+			ZeroMemory(&v8, sizeof(v8));
+			ZeroMemory(&v9, sizeof(v9));
+			do
+			{
+				v5 += 4i64;
+				v8 = _mm_xor_si128(v8, _mm_loadu_si128((const __m128i*)v2));
+				v10 = _mm_loadu_si128((const __m128i*)(v2 + 0x10));
+				v2 += 0x20i64;
+				v9 = _mm_xor_si128(v9, v10);
+			} while (v5 < v7);
+			v11 = _mm_xor_si128(v8, v9);
+			auto addr = _mm_xor_si128(v11, _mm_srli_si128(v11, 8));
+			v4 = *(__int64*)&addr;
 		}
-		for (; v6 < v5; ++v6) {
-			v4 ^= SDK->RPM<uintptr_t>(v2);
-			v2 += 8i64;
-		}
-		return v4 ^ ~v3 ^ 0x0EE7D407A24670E5E;
+		for (; v2 < v3; v2 += 8i64)
+			v4 ^= SDK->RPM<_QWORD>(v2);
+		return v4 ^ ~v3 ^ 0x0C8EFF42109E0F709i64;
 	}
 
 	uintptr_t GetHeapManager(uint8_t index) {
@@ -723,55 +725,47 @@ namespace OW {
 		return NULL;
 	}
 
-	uint64_t __fastcall DecryptOutline(__int64 a1)
+	inline uint64_t DecryptOutline(uint64_t a1)
 	{
-		__int64 v1; // rbx
-		unsigned __int64 v2; // rdi
-		unsigned __int64 v3; // rax
-		__int64 v4; // rbx
-		unsigned __int64 v5; // rdx
-		unsigned __int64 v6; // rcx
-		__m128i v7; // xmm1
-		__m128i v8; // xmm2
-		__m128i v9; // xmm0
-		__m128i v10; // xmm1
+		unsigned __int64 v2 = 0; // rdi
+		unsigned __int64 v3 = 0; // r8
+		unsigned __int64 v4 = 0; // rax
+		__int64 v5 = 0; // rbx
+		unsigned __int64 v6 = 0; // rcx
+		unsigned __int64 v7 = 0; // rcx
+		__m128i v8; // xmm1
+		__m128i v9; // xmm2
+		__m128i v10; // xmm0
+		__m128i v11; // xmm1
 
-		v2 = SDK->dwGameBase + offset::OutlineFN;
+		v2 = (SDK->dwGameBase + offset::OutlineFN);
 		v3 = v2 + 0x8;
-
-		uint64_t keys = SDK->dwGameBase + 0x3905B40 + 8 * (((_BYTE)a1 + 0x4B) & 0x7F);
-		v4 = v2 ^ SDK->RPM<DWORD_PTR>(keys
-			+ (((unsigned __int64)(a1 + offset::Outline_Key) >> 7) & 7)) ^ (a1 + offset::Outline_Key);
-
-		v5 = (v3 - v2 + 7) >> 3;
-		v6 = 0i64;
+		v4 = 0i64;
+		v5 = SDK->RPM<uintptr_t>(SDK->dwGameBase + 0x383DB40 + 8ull * (((uint8_t)a1 - 0x3F) & 0x7F)
+			+ (((unsigned __int64)(a1 - offset::Outline_Key) >> 7) & 7)) ^ v2 ^ (a1 - offset::Outline_Key);
+		v6 = (v3 - v2 + 7) >> 3;
 		if (v2 > v3)
-			v5 = 0i64;
-		if (v5)
+			v6 = 0i64;
+		if (v6 >= 4)
 		{
-			if (v5 >= 4)
+			v7 = v6 & 0xFFFFFFFFFFFFFFFCui64;
+			ZeroMemory(&v8, sizeof(v8));
+			ZeroMemory(&v9, sizeof(v9));
+			do
 			{
-				v7 = {};
-				v8 = {};
-				do
-				{
-					v6 += 4i64;
-					v7 = _mm_xor_si128(v7, _mm_loadu_si128((const __m128i*)v2));
-					v9 = _mm_loadu_si128((const __m128i*)(v2 + 16));
-					v2 += 0x20i64;
-					v8 = _mm_xor_si128(v8, v9);
-				} while (v6 < (v5 & 0xFFFFFFFFFFFFFFFCui64));
-				v10 = _mm_xor_si128(v7, v8);
-				__m128i P1 = _mm_xor_si128(v10, _mm_srli_si128(v10, 8));
-				v4 ^= *(DWORD_PTR*)&P1;
-			}
-			for (; v6 < v5; ++v6)
-			{
-				v4 ^= SDK->RPM<DWORD_PTR>(v2);
-				v2 += 8i64;
-			}
+				v4 += 4i64;
+				v8 = _mm_xor_si128(v8, _mm_loadu_si128((const __m128i*)v2));
+				v10 = _mm_loadu_si128((const __m128i*)(v2 + 0x10));
+				v2 += 0x20i64;
+				v9 = _mm_xor_si128(v9, v10);
+			} while (v4 < v7);
+			v11 = _mm_xor_si128(v8, v9);
+			auto addr = _mm_xor_si128(v11, _mm_srli_si128(v11, 8));
+			v5 = *(__int64*)&addr;
 		}
-		return v4 ^ ~v3 ^ offset::Outline_Key;
+		for (; v2 < v3; v2 += 8i64)
+			v5 ^= SDK->RPM<_QWORD>(v2);
+		return v5 ^ ~v3 ^ 0x0960E0DB66A0928C1i64;
 	}
 
 	inline void SetBorderLine(uint32_t BorderType, DWORD_PTR base)
