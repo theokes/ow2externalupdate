@@ -79,7 +79,7 @@ int main()
 	if (!OW::Config::loginornot) MainThread();
 	std::string consoleTitle = (std::string)skCrypt("Loader - Built at:  ") + compilation_date + " " + compilation_time;
 	SetConsoleTitleA(consoleTitle.c_str());
-	std::cout << skCrypt("\n\nLoading..");
+	std::cout << skCrypt("\n\nInitializing..");
 	/*KeyAuthApp.init();
 
 	if (!KeyAuthApp.data.success)

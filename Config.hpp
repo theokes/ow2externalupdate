@@ -8,7 +8,7 @@ namespace OW {
 		int got = 0;
 
 		bool namespoofer = false;
-		char fakename[] = u8"ÁÔ»§×ùÓÃ»§#1234";
+		char fakename[] = u8"Timmothy#6241";
 
 		uint8_t trytoplus = 0;
 
