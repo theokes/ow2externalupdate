@@ -130,6 +130,7 @@ namespace OW {
 		float health = 0.f;
 		bool AutoMelee = false;
 		bool AutoShiftGenji = false;
+		bool AutoHookRoad = false;
 		bool sskilled = false;
 		bool outline = false;
 		bool externaloutline = false;

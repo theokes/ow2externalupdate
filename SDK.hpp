@@ -139,7 +139,7 @@ namespace OW {
 		{
 			MEMORY_BASIC_INFORMATION64 mbi = { 0, };
 			MEMORY_BASIC_INFORMATION64 old = { 0, };
-			DWORD64 current_address = 0x7ffe0000;
+			DWORD64 current_address = 0; // 0x7ffe0000
 			std::vector<MEMORY_BASIC_INFORMATION64> addresses;
 			while (true)
 			{

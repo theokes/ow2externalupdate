@@ -242,7 +242,8 @@ namespace OW {
 					//printf("%llx\n", SDK->RPM<uint64_t>(entity.VisBase + 0xa0));
 				}
 				if (entity.SkillBase) {
-					entity.skill1act = IsSkillActive(entity.SkillBase + 0x40, 0, 0x28E3);
+					entity.skill1act = IsSkillActive(entity.SkillBase + 0x40, 0, 0x28E3); // 0x40, 0, 0x28E3 test2
+					//entity.skill1act = IsSkillActivate1(entity.SkillBase + 0x40, 0x1, 0x2B8); test1
 					entity.skill2act = IsSkillActive(entity.SkillBase + 0x40, 0, 0x28E9);
 					entity.ultimate = readult(entity.SkillBase + 0x40, 0, 0x1e32);
 					if (entity.HeroID == eHero::HERO_SOMBRA && entity.Team && !Config::Rage && !Config::fov360 && !Config::silent && !Config::fakesilent) {
@@ -1217,9 +1218,9 @@ namespace OW {
 
 			HWND tWnd = FindWindowA(skCrypt("TankWindowClass"), NULL);
 
-			WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, skCrypt("ImperialUltra"), NULL };
+			WNDCLASSEX wc = { sizeof(WNDCLASSEX), CS_CLASSDC, WndProc, 0L, 0L, GetModuleHandle(NULL), NULL, NULL, NULL, NULL, skCrypt("Playground"), NULL };
 			RegisterClassEx(&wc);
-			hwnd = CreateWindow(wc.lpszClassName, skCrypt("ImperialUltra"), WS_POPUP, 0, 0, 0, 0, NULL, NULL, wc.hInstance, NULL);
+			hwnd = CreateWindow(wc.lpszClassName, skCrypt("Playground"), WS_POPUP, 0, 0, 0, 0, NULL, NULL, wc.hInstance, NULL);
 			/*
 			static RECT TempRect = { NULL };
 			static POINT TempPoint;
@@ -1648,6 +1649,7 @@ namespace OW {
 									Config::triggerbot = false;
 									Config::silent = false;
 								}
+
 								//ImGui::Checkbox(skCrypt(u8"全局回溯"), &Config::trackback);
 								//ImGui::Checkbox(skCrypt(u8"开启预判"), &Config::Prediction);
 								ImGui::Toggle(skCrypt(u8"Prediction"), &Config::Prediction, ImGuiToggleFlags_Animated);
@@ -1679,6 +1681,28 @@ namespace OW {
 										ImGui::SliderInt(skCrypt(u8"Interval(ms)"), &Config::Shoottime, 0, 1500, skCrypt("%.2f"));
 									}
 								}
+								/*if (local_entity.HeroID == eHero::HERO_ROADHOG) {
+								ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.f, 0.f, 0.f, 1.0f));
+								ImGui::Toggle(skCrypt(u8"Roadhog Auto Hook"), &Config::AutoHookRoad, ImGuiToggleFlags_Animated);
+								ImGui::PopStyleColor(1);
+							}*///roadhog hook flick
+								if (local_entity.HeroID == eHero::HERO_ROADHOG) {
+									ImGui::Toggle(skCrypt(u8"Roadhog Auto Hook"), &Config::AutoHookRoad, ImGuiToggleFlags_Animated);
+								}
+								if (Config::AutoHookRoad || Config::Prediction) {
+									ImGui::Separator();
+									ImGui::BulletText(skCrypt(u8"PredictLevel"));
+									ImGui::SliderFloat(skCrypt(u8"BulletTravelSpeed"), &Config::predit_level, 0.f, 200.f, skCrypt("%.2f"));
+								}
+								if (Config::AutoHookRoad) {
+									Config::Flick = false;
+									Config::triggerbot = false;
+									Config::Tracking = false;
+									Config::silent = false;
+								}
+								else Config::AutoHookRoad = false;
+							
+								
 								ImGui::PopStyleColor(1);
 								ImGui::BulletText(skCrypt(u8"Keybind"));
 								if (ImGui::BeginCombo(skCrypt(u8"##Key"), keys))
@@ -1868,7 +1892,7 @@ namespace OW {
 							}
 
 							if (subindex == 2) {
-								ImGui::BulletText(u8"SecondAim doesnt available with silent and legit");
+								ImGui::BulletText(u8"SecondAim isn't available with silent and legit");
 								ImGui::Spacing();
 								ImGui::Spacing();
 								ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.f, 0.f, 0.f, 1.0f));
@@ -2878,36 +2902,6 @@ namespace OW {
 							else speed = Config::bladespeed;
 							Config::Qtime = GetTickCount();
 							auto vec = GetVector3forgenji();
-							/*if (vec != Vector3(0, 0, 0)) {
-								auto local_angle = SDK->RPM<Vector3>(SDK->g_player_controller + 0x12A0);
-								auto calc_target = CalcAngle(XMFLOAT3(vec.X, vec.Y, vec.Z), viewMatrix_xor.get_location());
-								auto vec_calc_target = Vector3(calc_target.x, calc_target.y, calc_target.z);
-								auto Target = SmoothLinear(local_angle, vec_calc_target, Config::Tracking_smooth / 10.f);
-								auto local_loc = Vector3(viewMatrix_xor.get_location().x, viewMatrix_xor.get_location().y, viewMatrix_xor.get_location().z);
-								float dist = Vector3(viewMatrix_xor.get_location().x, viewMatrix_xor.get_location().y, viewMatrix_xor.get_location().z).DistTo(vec);
-								if (Target != Vector3(0, 0, 0)) {
-									SDK->WPM<Vector3>(SDK->g_player_controller + 0x12A0, Target);
-									if (Config::lastenemy != Config::Targetenemyi && dist < 20) {
-										while (!in_range(local_angle, vec_calc_target, local_loc, vec, 0.3)) {
-											vec = GetVector3forgenji();
-											local_angle = SDK->RPM<Vector3>(SDK->g_player_controller + 0x12A0);
-											calc_target = CalcAngle(XMFLOAT3(vec.X, vec.Y, vec.Z), viewMatrix_xor.get_location());
-											vec_calc_target = Vector3(calc_target.x, calc_target.y, calc_target.z);
-											Target = SmoothLinear(local_angle, vec_calc_target, Config::Tracking_smooth / 10.f);
-											local_loc = Vector3(viewMatrix_xor.get_location().x, viewMatrix_xor.get_location().y, viewMatrix_xor.get_location().z);
-											if (Config::Rage) SDK->WPM<Vector3>(SDK->g_player_controller + 0x12A0, vec_calc_target);
-											else SDK->WPM<Vector3>(SDK->g_player_controller + 0x12A0, Target);
-										}
-										Config::lastenemy = Config::Targetenemyi;
-										SetKey(0x8);
-										Sleep(45);
-									}
-									else if (dist >= 20)
-										Config::lastenemy = -1;
-									else Config::lastenemy = Config::Targetenemyi;
-								}
-							}
-							vec = GetVector3forgenji();*/
 							if (vec != Vector3(0, 0, 0)) {
 								float dist = Vector3(viewMatrix_xor.get_location().x, viewMatrix_xor.get_location().y, viewMatrix_xor.get_location().z).DistTo(vec);
 								if (dist > 20) continue;
@@ -2947,24 +2941,7 @@ namespace OW {
 									}
 								}
 							}
-							/*vec = GetVector3forgenji();
-							if (vec != Vector3(0, 0, 0)) {
-								float dist = Vector3(viewMatrix_xor.get_location().x, viewMatrix_xor.get_location().y, viewMatrix_xor.get_location().z).DistTo(vec);
-								auto local_angle = SDK->RPM<Vector3>(SDK->g_player_controller + 0x12A0);
-								auto calc_target = CalcAngle(XMFLOAT3(vec.X, vec.Y, vec.Z), viewMatrix_xor.get_location());
-								auto vec_calc_target = Vector3(calc_target.x, calc_target.y, calc_target.z);
-								auto Target = SmoothLinear(local_angle, vec_calc_target, Config::Tracking_smooth / 10.f);
-								auto local_loc = Vector3(viewMatrix_xor.get_location().x, viewMatrix_xor.get_location().y, viewMatrix_xor.get_location().z);
-
-								if (Target != Vector3(0, 0, 0)) {
-									if (Config::Rage) SDK->WPM<Vector3>(SDK->g_player_controller + 0x12A0, vec_calc_target);
-									else SDK->WPM<Vector3>(SDK->g_player_controller + 0x12A0, Target);
-									float dist = Vector3(viewMatrix_xor.get_location().x, viewMatrix_xor.get_location().y, viewMatrix_xor.get_location().z).DistTo(vec);
-									if (!local_entity.skillcd1 && in_range(local_angle, vec_calc_target, local_loc, vec, 0.3) && dist < 20)
-										SetKeyHold(0x8, 70);
-								}
-							}*/
-							//mutex.unlock();
+			
 							Sleep(1);
 							Config::lastenemy = Config::Targetenemyi;
 
@@ -3051,6 +3028,34 @@ namespace OW {
 							//if (local_entity.skill1act) {
 							//	Config::sskilled = true;
 							//}
+						}
+					}
+
+
+					if (Config::AutoHookRoad && local_entity.HeroID == eHero::HERO_ROADHOG) {
+						while (GetAsyncKeyState(Config::aim_key)) { //loop while aim key is held down, can change it and add a second key entirely
+							auto vec = GetVector3(false);
+							if (vec != Vector3(0, 0, 0) && !entities[Config::Targetenemyi].imort && !entities[Config::Targetenemyi].barrprot && entities[Config::Targetenemyi].Team) {
+								float dist = Vector3(viewMatrix_xor.get_location().x, viewMatrix_xor.get_location().y, viewMatrix_xor.get_location().z).DistTo(vec);
+								if (dist <= 20) { //!local_entity.skillcd1 not working, SkillBase + 0x40, 0, 0x????
+									auto local_angle = SDK->RPM<Vector3>(SDK->g_player_controller + 0x1170);
+									auto calc_target = CalcAngle(XMFLOAT3(vec.X, vec.Y, vec.Z), viewMatrix_xor.get_location());
+									auto vec_calc_target = Vector3(calc_target.x, calc_target.y, calc_target.z);
+									auto Target = SmoothLinear(local_angle, vec_calc_target, Config::Tracking_smooth / 10.f);
+									// SmoothAccelerate(local_angle, vec_calc_target, Config::Flick_smooth / 10.f, Config::accvalue);
+									// SmoothLinear(local_angle, vec_calc_target, Config::Tracking_smooth / 10.f);
+									auto local_loc = Vector3(viewMatrix_xor.get_location().x, viewMatrix_xor.get_location().y, viewMatrix_xor.get_location().z);
+
+									//aim at the target
+									SDK->WPM<Vector3>(SDK->g_player_controller + 0x1170, Target);
+
+									if (in_range(local_angle, vec_calc_target, local_loc, vec, 1)) {
+										SetKeyHold(0x8, 100); //having it hold the key so it doesn't interrupt aimbot thread
+										//isHookOnCooldown logic; SkillBase + 0x40, 0, 0x???
+									}
+								}
+							}
+							Sleep(10); //small delay for CPU usage
 						}
 					}
 
@@ -3214,7 +3219,7 @@ namespace OW {
 						}
 						Config::Targetenemyi = -1;
 					}
-					//死神换弹
+					//reaper reload animation cancel, doesn't really speed it up though
 					if (local_entity.HeroID == eHero::HERO_REAPER && Config::reloading) {
 						Sleep(300);
 						SetKey(0x800);
@@ -3347,7 +3352,7 @@ namespace OW {
 		//timetobegin = GetTickCount();
 		//int timepassed = 0;
 		if (Config::lastheroid == -2) {
-			ImGui::InsertNotification({ ImGuiToastType_Success, 8000, skCrypt(u8"Rigel Internal Loaded\nWelcome！"), "" });
+			ImGui::InsertNotification({ ImGuiToastType_Success, 8000, skCrypt(u8"Rigel Loaded\nWhalecum！"), "" });
 			Config::lastheroid = 0;
 		}
 		while (1) {
@@ -3449,6 +3454,11 @@ namespace OW {
 							WritePrivateProfileString(_T(GetHeroEngNames(Config::lastheroid, local_entity.LinkBase).c_str()), _T("AutoShiftGenji"), bufsave, _T(".\\config.ini"));
 							_stprintf(bufsave, _T("%d"), (int)(Config::bladespeed * 10000));
 							WritePrivateProfileString(_T(GetHeroEngNames(Config::lastheroid, local_entity.LinkBase).c_str()), _T("bladespeed"), bufsave, _T(".\\config.ini"));
+						}
+
+						if (Config::lastheroid == eHero::HERO_ROADHOG) {
+							_stprintf(bufsave, _T("%d"), Config::AutoHookRoad);
+							WritePrivateProfileString(_T(GetHeroEngNames(Config::lastheroid, local_entity.LinkBase).c_str()), _T("AutoHookRoad"), bufsave, _T(".\\config.ini"));
 						}
 
 						if (Config::lastheroid == eHero::HERO_WIDOWMAKER) {
@@ -3867,6 +3877,12 @@ namespace OW {
 						Config::AutoShiftGenji = GetPrivateProfileInt(_T(GetHeroEngNames(local_entity.HeroID, local_entity.LinkBase).c_str()), _T("AutoShiftGenji"), 0, _T(".\\config.ini"));
 						Config::bladespeed = float(GetPrivateProfileInt(_T(GetHeroEngNames(local_entity.HeroID, local_entity.LinkBase).c_str()), _T("bladespeed"), 5000, _T(".\\config.ini"))) / 10000.f;
 					}
+					if (local_entity.HeroID == eHero::HERO_ROADHOG) {
+						Config::AutoHookRoad == GetPrivateProfileInt(_T(GetHeroEngNames(local_entity.HeroID, local_entity.LinkBase).c_str()), _T("AutoHookRoad"), 0, _T(".\\config.ini"));
+					}
+					//if (local_entity.HeroID != eHero::HERO_ROADHOG && (Config::AutoHookRoad = true)) {
+						//Config::AutoHookRoad = false;
+					//}
 					if (local_entity.HeroID == eHero::HERO_WIDOWMAKER) {
 						Config::widowautounscope = GetPrivateProfileInt(_T(GetHeroEngNames(local_entity.HeroID, local_entity.LinkBase).c_str()), _T("widowautounscope"), 0, _T(".\\config.ini"));
 					}
@@ -3988,6 +4004,12 @@ namespace OW {
 					WritePrivateProfileString(_T(GetHeroEngNames(Config::lastheroid, local_entity.LinkBase).c_str()), _T("AutoShiftGenji"), bufsave, _T(".\\config.ini"));
 					_stprintf(bufsave, _T("%d"), (int)(Config::bladespeed * 10000));
 					WritePrivateProfileString(_T(GetHeroEngNames(Config::lastheroid, local_entity.LinkBase).c_str()), _T("bladespeed"), bufsave, _T(".\\config.ini"));
+				}
+
+				if (Config::lastheroid == eHero::HERO_ROADHOG) {
+					_stprintf(bufsave, _T("%d"), Config::AutoHookRoad);
+					WritePrivateProfileString(_T(GetHeroEngNames(Config::lastheroid, local_entity.LinkBase).c_str()), _T("AutoHookRoad"), bufsave, _T(".\\config.ini"));
+
 				}
 
 				if (Config::lastheroid == eHero::HERO_WIDOWMAKER) {
