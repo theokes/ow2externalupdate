@@ -269,7 +269,7 @@ namespace OW {
 
 				if (entity.OutlineBase)
 				{
-					if (Config::externaloutline && !entity.Vis)	SetBorderLine(0x2, entity.OutlineBase);
+					if (Config::externaloutline && !entity.Vis)	SetBorderLine(0x2, entity.OutlineBase); //0x2 
 					else SetBorderLine(0x1, entity.OutlineBase);
 					if (Config::externaloutline) {
 						if (entity.Team && i != Config::Targetenemyi && !Config::healthoutline && !Config::rainbowoutline) {
@@ -1650,12 +1650,23 @@ namespace OW {
 									Config::silent = false;
 								}
 
+
 								//ImGui::Checkbox(skCrypt(u8"全局回溯"), &Config::trackback);
 								//ImGui::Checkbox(skCrypt(u8"开启预判"), &Config::Prediction);
 								ImGui::Toggle(skCrypt(u8"Prediction"), &Config::Prediction, ImGuiToggleFlags_Animated);
 								if (Config::Prediction) ImGui::Toggle(skCrypt(u8"Gravity Predict"), &Config::Gravitypredit, ImGuiToggleFlags_Animated);
 								//ImGui::Checkbox(skCrypt(u8"重力预判"), &Config::Gravitypredit);
 								else Config::Gravitypredit = false;
+								if (local_entity.HeroID == eHero::HERO_ROADHOG) {
+									ImGui::Toggle(skCrypt(u8"Roadhog Auto Hook"), &Config::AutoHookRoad, ImGuiToggleFlags_Animated);
+								}
+								if (Config::AutoHookRoad) {
+									Config::Flick = false;
+									Config::triggerbot = false;
+									Config::Tracking = false;
+									Config::silent = false;
+								}
+								else Config::AutoHookRoad = false;
 								if (local_entity.HeroID == eHero::HERO_HANJO) {
 									ImGui::Toggle(skCrypt(u8"Hanzo Flick"), &Config::hanzo_flick, ImGuiToggleFlags_Animated);
 									ImGui::Toggle(skCrypt(u8"Auto Calculate Speed"), &Config::hanzoautospeed, ImGuiToggleFlags_Animated);
@@ -1668,8 +1679,9 @@ namespace OW {
 									Config::silent = false;
 								}
 								//ImGui::Checkbox(skCrypt(u8"半藏甩箭"), &Config::hanzo_flick);
+
 								else Config::hanzo_flick = false;
-								if (Config::hanzo_flick || Config::Prediction) {
+								if (Config::hanzo_flick || Config::Prediction || Config::AutoHookRoad) {
 									ImGui::Separator();
 									ImGui::BulletText(skCrypt(u8"PredictLevel"));
 									ImGui::SliderFloat(skCrypt(u8"BulletTravelSpeed"), &Config::predit_level, 0.f, 200.f, skCrypt("%.2f"));
@@ -1686,21 +1698,7 @@ namespace OW {
 								ImGui::Toggle(skCrypt(u8"Roadhog Auto Hook"), &Config::AutoHookRoad, ImGuiToggleFlags_Animated);
 								ImGui::PopStyleColor(1);
 							}*///roadhog hook flick
-								if (local_entity.HeroID == eHero::HERO_ROADHOG) {
-									ImGui::Toggle(skCrypt(u8"Roadhog Auto Hook"), &Config::AutoHookRoad, ImGuiToggleFlags_Animated);
-								}
-								if (Config::AutoHookRoad || Config::Prediction) {
-									ImGui::Separator();
-									ImGui::BulletText(skCrypt(u8"PredictLevel"));
-									ImGui::SliderFloat(skCrypt(u8"BulletTravelSpeed"), &Config::predit_level, 0.f, 200.f, skCrypt("%.2f"));
-								}
-								if (Config::AutoHookRoad) {
-									Config::Flick = false;
-									Config::triggerbot = false;
-									Config::Tracking = false;
-									Config::silent = false;
-								}
-								else Config::AutoHookRoad = false;
+				
 							
 								
 								ImGui::PopStyleColor(1);
@@ -2370,7 +2368,7 @@ namespace OW {
 							//ImGui::Checkbox(skCrypt(u8"自动技能"), &Config::AutoSkill);
 							ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(1.f, 0.f, 0.f, 1.0f));
 							ImGui::Toggle(skCrypt(u8"Auto Heal Skill"), &Config::AutoSkill, ImGuiToggleFlags_Animated);
-							ImGui::SliderFloat(skCrypt(u8"Auto Heal Skill Trigger HP"), &Config::SkillHealth, 0.f, 80.f, skCrypt("%.2f"));
+							ImGui::SliderFloat(skCrypt(u8"Auto Heal Skill Trigger HP"), &Config::SkillHealth, 0.f, 400.f, skCrypt("%.2f"));
 							ImGui::PopStyleColor(1);
 							
 							if (ImGui::Button(u8"Manual Save"))
@@ -2889,6 +2887,124 @@ namespace OW {
 							}
 						}
 					}
+
+					else if (Config::AutoHookRoad && local_entity.HeroID == eHero::HERO_ROADHOG)
+					{
+						if (Config::hitboxdelayshoot) {
+							if (Config::shooted || !GetAsyncKeyState(Config::aim_key)) {
+								dodelay = 1;
+								hitbotdelaytime = 0;
+							}
+						}
+						while (GetAsyncKeyState(Config::aim_key) && !Config::shooted)
+						{
+							//mutex.lock();
+							auto vec = GetVector3(true);
+							if (vec == Vector3(0, 0, 0)) {
+								//mutex.unlock();
+								break;
+							}
+							if (vec != Vector3(0, 0, 0) && !(entities[Config::Targetenemyi].skill2act && entities[Config::Targetenemyi].HeroID == eHero::HERO_GENJI) && ((!entities[Config::Targetenemyi].imort && !entities[Config::Targetenemyi].barrprot) || Config::switch_team))
+							{
+								float dist = Vector3(viewMatrix_xor.get_location().x, viewMatrix_xor.get_location().y, viewMatrix_xor.get_location().z).DistTo(vec);
+								if (dist <= 20)
+								{
+
+									auto local_angle = SDK->RPM<Vector3>(SDK->g_player_controller + 0x1170);
+									auto calc_target = CalcAngle(XMFLOAT3(vec.X, vec.Y, vec.Z), viewMatrix_xor.get_location());
+									auto vec_calc_target = Vector3(calc_target.x, calc_target.y, calc_target.z);
+									auto Target = SmoothAccelerate(local_angle, vec_calc_target, Config::Flick_smooth / 10.f, Config::accvalue);
+									auto local_loc = Vector3(viewMatrix_xor.get_location().x, viewMatrix_xor.get_location().y, viewMatrix_xor.get_location().z);
+									if (dodelay && !Config::doingdelay) {//超时开枪 dodelay
+										hitbotdelaytime = GetTickCount();
+										dodelay = 0;
+									}
+									if (Target != Vector3(0, 0, 0) && dist <= 20) {
+										if (Config::hitboxdelayshoot && hitbotdelaytime != 0) {
+											afterdelaytime = GetTickCount();
+											if (afterdelaytime - hitbotdelaytime > Config::hiboxdelaytime && !Config::doingdelay) {
+												//if (local_entity.skill2act) SetKey(0x8);
+												SetKeyHold(0x8, 100);
+												Config::shooted = true;
+												continue;
+											}
+										}
+
+										if (Config::targetdelay) {
+											if (Config::lastenemy != Config::Targetenemyi)  Config::doingdelay = 1;
+											if (Config::doingdelay == 1) {
+												Config::lastenemy = Config::Targetenemyi;
+												if (Config::timebeforedelay == 0) {
+													Config::timebeforedelay = GetTickCount();
+													continue;
+												}
+												if (GetTickCount() - Config::timebeforedelay < Config::targetdelaytime) continue;
+												else Config::timebeforedelay = 0;
+												Config::doingdelay = 0;
+												hitbotdelaytime = GetTickCount();
+											}
+										}
+										else if (Config::doingdelay) Config::doingdelay = 0;
+										SDK->WPM<Vector3>(SDK->g_player_controller + 0x1170, Target);
+										if (in_range(local_angle, vec_calc_target, local_loc, vec, Config::hitbox)) {
+											if (Config::lockontarget) SDK->WPM<float>(GetSenstivePTR(), 0);
+											//if (local_entity.skill2act) SetKey(0x8);
+											SetKeyHold(0x8, 100);
+											Sleep(1);
+											if (Config::dontshot) Config::shotcount++;
+											if (Config::lockontarget) SDK->WPM<float>(GetSenstivePTR(), origin_sens);
+											Config::shooted = true;
+										}
+										else if (Config::dontshot && Config::shotcount >= Config::shotmanydont) {
+											if (in_range(local_angle, vec_calc_target, local_loc, vec, Config::missbox)) {
+												Config::shotcount = 0;
+												//if (local_entity.skill2act) {
+													//SetKey(0x8);
+												//}
+												//else {
+												SetKeyHold(0x8, 100);
+												//}
+												Config::shooted = true;
+												continue;
+											}
+										}
+									}
+									else hitbotdelaytime = 0;
+								}
+
+
+								//mutex.unlock();
+								Sleep(1);
+								if (Config::autoscalefov) {
+									auto vec = GetVector3forfov();
+									if (vec != Vector3(0, 0, 0)) {
+										Vector2 high;
+										Vector2 low;
+										if (viewMatrix.WorldToScreen(entities[Config::Targetenemyifov].head_pos, &high, Vector2(WX, WY)) && viewMatrix.WorldToScreen(entities[Config::Targetenemyifov].chest_pos, &low, Vector2(WX, WY)))
+										{
+											Config::Fov = -(high.Y - low.Y) * 4;
+											if (Config::Fov > 500) Config::Fov = 500;
+											else if (Config::Fov < Config::minFov1) Config::Fov = Config::minFov1;
+											Config::Fov2 = -(high.Y - low.Y) * 4;
+											if (Config::Fov2 > 500) Config::Fov2 = 500;
+											else if (Config::Fov2 < Config::minFov2) Config::Fov2 = Config::minFov2;
+										}
+										else
+										{
+											Config::Fov = Config::minFov1;
+											Config::Fov2 = Config::minFov2;
+										}
+
+									}
+									else
+									{
+										Config::Fov = Config::minFov1;
+										Config::Fov2 = Config::minFov2;
+									}
+								}
+							}
+						}
+					}
 					if (Config::GenjiBlade && GetAsyncKeyState(0x51) && local_entity.HeroID == eHero::HERO_GENJI && local_entity.ultimate == 100) {
 						Config::Qstarttime = GetTickCount();
 						Config::Qtime = Config::Qstarttime;
@@ -3032,16 +3148,16 @@ namespace OW {
 					}
 
 
-					if (Config::AutoHookRoad && local_entity.HeroID == eHero::HERO_ROADHOG) {
+					/*if (Config::AutoHookRoad && local_entity.HeroID == eHero::HERO_ROADHOG) {
 						while (GetAsyncKeyState(Config::aim_key)) { //loop while aim key is held down, can change it and add a second key entirely
 							auto vec = GetVector3(false);
 							if (vec != Vector3(0, 0, 0) && !entities[Config::Targetenemyi].imort && !entities[Config::Targetenemyi].barrprot && entities[Config::Targetenemyi].Team) {
 								float dist = Vector3(viewMatrix_xor.get_location().x, viewMatrix_xor.get_location().y, viewMatrix_xor.get_location().z).DistTo(vec);
-								if (dist <= 20) { //!local_entity.skillcd1 not working, SkillBase + 0x40, 0, 0x????
+								if (dist <= 19) { //!local_entity.skillcd1 not working, SkillBase + 0x40, 0, 0x????
 									auto local_angle = SDK->RPM<Vector3>(SDK->g_player_controller + 0x1170);
 									auto calc_target = CalcAngle(XMFLOAT3(vec.X, vec.Y, vec.Z), viewMatrix_xor.get_location());
 									auto vec_calc_target = Vector3(calc_target.x, calc_target.y, calc_target.z);
-									auto Target = SmoothLinear(local_angle, vec_calc_target, Config::Tracking_smooth / 10.f);
+									auto Target = SmoothAccelerate(local_angle, vec_calc_target, Config::Flick_smooth / 10.f, Config::accvalue);
 									// SmoothAccelerate(local_angle, vec_calc_target, Config::Flick_smooth / 10.f, Config::accvalue);
 									// SmoothLinear(local_angle, vec_calc_target, Config::Tracking_smooth / 10.f);
 									auto local_loc = Vector3(viewMatrix_xor.get_location().x, viewMatrix_xor.get_location().y, viewMatrix_xor.get_location().z);
@@ -3057,7 +3173,8 @@ namespace OW {
 							}
 							Sleep(10); //small delay for CPU usage
 						}
-					}
+					}*/
+
 
 					if (Config::AutoSkill) {
 						if (local_entity.PlayerHealth > Config::SkillHealth && Config::skilled) {
@@ -3085,7 +3202,7 @@ namespace OW {
 							}
 							else if (local_entity.HeroID == eHero::HERO_ROADHOG && local_entity.PlayerHealth != 0 && !Config::skilled) {
 								//SDK->WPM<float>(GetSenstivePTR(), 0);
-								SetKey(0x10);
+								SetKeyHold(0x2, 1562);
 								//SDK->WPM<float>(GetSenstivePTR(), origin_sens);
 								Config::skilled = true;
 								Sleep(1);
@@ -3346,6 +3463,7 @@ namespace OW {
 
 		}
 	}
+	
 	inline void configsavenloadthread() {
 		TCHAR bufsave[100];
 		//int timetobegin = 0;
