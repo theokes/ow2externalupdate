@@ -1681,7 +1681,7 @@ namespace OW {
 								//ImGui::Checkbox(skCrypt(u8"半藏甩箭"), &Config::hanzo_flick);
 
 								else Config::hanzo_flick = false;
-								if (Config::hanzo_flick || Config::Prediction || Config::AutoHookRoad) {
+								if (Config::hanzo_flick || Config::Prediction || Config::AutoHookRoad) { // || Config::AutoHookRoad
 									ImGui::Separator();
 									ImGui::BulletText(skCrypt(u8"PredictLevel"));
 									ImGui::SliderFloat(skCrypt(u8"BulletTravelSpeed"), &Config::predit_level, 0.f, 200.f, skCrypt("%.2f"));
@@ -2898,10 +2898,8 @@ namespace OW {
 						}
 						while (GetAsyncKeyState(Config::aim_key) && !Config::shooted)
 						{
-							//mutex.lock();
 							auto vec = GetVector3(true);
 							if (vec == Vector3(0, 0, 0)) {
-								//mutex.unlock();
 								break;
 							}
 							if (vec != Vector3(0, 0, 0) && !(entities[Config::Targetenemyi].skill2act && entities[Config::Targetenemyi].HeroID == eHero::HERO_GENJI) && ((!entities[Config::Targetenemyi].imort && !entities[Config::Targetenemyi].barrprot) || Config::switch_team))
@@ -2915,15 +2913,14 @@ namespace OW {
 									auto vec_calc_target = Vector3(calc_target.x, calc_target.y, calc_target.z);
 									auto Target = SmoothAccelerate(local_angle, vec_calc_target, Config::Flick_smooth / 10.f, Config::accvalue);
 									auto local_loc = Vector3(viewMatrix_xor.get_location().x, viewMatrix_xor.get_location().y, viewMatrix_xor.get_location().z);
-									if (dodelay && !Config::doingdelay) {//超时开枪 dodelay
+									if (dodelay && !Config::doingdelay) {
 										hitbotdelaytime = GetTickCount();
 										dodelay = 0;
 									}
-									if (Target != Vector3(0, 0, 0) && dist <= 20) {
+									if (Target != Vector3(0, 0, 0)) {
 										if (Config::hitboxdelayshoot && hitbotdelaytime != 0) {
 											afterdelaytime = GetTickCount();
 											if (afterdelaytime - hitbotdelaytime > Config::hiboxdelaytime && !Config::doingdelay) {
-												//if (local_entity.skill2act) SetKey(0x8);
 												SetKeyHold(0x8, 100);
 												Config::shooted = true;
 												continue;
@@ -2948,7 +2945,6 @@ namespace OW {
 										SDK->WPM<Vector3>(SDK->g_player_controller + 0x1170, Target);
 										if (in_range(local_angle, vec_calc_target, local_loc, vec, Config::hitbox)) {
 											if (Config::lockontarget) SDK->WPM<float>(GetSenstivePTR(), 0);
-											//if (local_entity.skill2act) SetKey(0x8);
 											SetKeyHold(0x8, 100);
 											Sleep(1);
 											if (Config::dontshot) Config::shotcount++;
@@ -2958,12 +2954,7 @@ namespace OW {
 										else if (Config::dontshot && Config::shotcount >= Config::shotmanydont) {
 											if (in_range(local_angle, vec_calc_target, local_loc, vec, Config::missbox)) {
 												Config::shotcount = 0;
-												//if (local_entity.skill2act) {
-													//SetKey(0x8);
-												//}
-												//else {
 												SetKeyHold(0x8, 100);
-												//}
 												Config::shooted = true;
 												continue;
 											}
@@ -2971,9 +2962,6 @@ namespace OW {
 									}
 									else hitbotdelaytime = 0;
 								}
-
-
-								//mutex.unlock();
 								Sleep(1);
 								if (Config::autoscalefov) {
 									auto vec = GetVector3forfov();
@@ -3998,9 +3986,9 @@ namespace OW {
 					if (local_entity.HeroID == eHero::HERO_ROADHOG) {
 						Config::AutoHookRoad == GetPrivateProfileInt(_T(GetHeroEngNames(local_entity.HeroID, local_entity.LinkBase).c_str()), _T("AutoHookRoad"), 0, _T(".\\config.ini"));
 					}
-					//if (local_entity.HeroID != eHero::HERO_ROADHOG && (Config::AutoHookRoad = true)) {
-						//Config::AutoHookRoad = false;
-					//}
+					if (local_entity.HeroID != eHero::HERO_ROADHOG && (Config::AutoHookRoad = true)) {
+						Config::AutoHookRoad = false;
+					}
 					if (local_entity.HeroID == eHero::HERO_WIDOWMAKER) {
 						Config::widowautounscope = GetPrivateProfileInt(_T(GetHeroEngNames(local_entity.HeroID, local_entity.LinkBase).c_str()), _T("widowautounscope"), 0, _T(".\\config.ini"));
 					}
