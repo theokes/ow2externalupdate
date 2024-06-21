@@ -63,13 +63,13 @@ namespace OW {
 		}
 		
 		inline bool GetGlobalKey() {
-			static auto key_sig = (BYTE*)"\x00\x00\x00\x00\x21\x00\x00\x00\x00\x00\x00\x00\x24\x00\x00\x00\x01\x00\x00\x00\x29\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00";
-			static auto key_mask = "xxxxxxxxxxxxx?xxxxxxxxxxxxxxxxxxxxxxxx";
+			static auto key_sig = (BYTE*)"\xFF\xFF\xFF\xFF\xFF\x01\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x02\x00\x00\x00";
+			static auto key_mask = "xxxxxxxx????????????????????x???";
 			while (true) {
 				uint64_t Key = FindPatternExReg(key_sig, key_mask, 0x100000);
-				if (Key && Key < 0xf000000000000000 && RPM<uint64_t>(Key + 0x38) > 0x1000000000000000 && RPM<uint64_t>(Key + 0xB8) > 0x1000000000000000) {
-					GlobalKey1 = RPM<uint64_t>(Key + 0x38);
-					GlobalKey2 = RPM<uint64_t>(Key + 0xB8);
+				if (Key && Key < 0xf000000000000000 && RPM<uint64_t>(Key - 0xE0) > 0x1000000000000000 && RPM<uint64_t>(Key - 0x40) > 0x1000000000000000) {
+					GlobalKey1 = RPM<uint64_t>(Key - 0xE0);
+					GlobalKey2 = RPM<uint64_t>(Key - 0x40);
 					printf("GlobalKey1: 0x%llx\n", GlobalKey1);
 					printf("GlobalKey2: 0x%llx\n", GlobalKey2);
 					return true;

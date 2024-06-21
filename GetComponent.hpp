@@ -314,11 +314,12 @@ namespace OW {
 		unsigned __int64 v9 = SDK->RPM<uintptr_t>((SDK->RPM<uintptr_t>((v1 + 0x80)) + 8 * (SDK->RPM<uint8_t>(((uint32_t)v5 + v1 + 0x130)) + ((0x101010101010101 * (((v8 & 0x3333333333333333) + ((v8 >> 2) & 0x3333333333333333) + (((v8 & 0x3333333333333333) + ((v8 >> 2) & 0x3333333333333333)) >> 4)) & 0xF0F0F0F0F0F0F0F)) >> 0x38))));
 		unsigned __int64 Key1 = SDK->GlobalKey1;
 		unsigned __int64 Key2 = SDK->GlobalKey2;
-		auto dummy = SDK->RPM<_QWORD>(SDK->dwGameBase + 0x38996E0 + (Key1 >> 0x34));
-		auto dummy2 = SDK->RPM<_QWORD>(SDK->dwGameBase + 0x38996E0 + (Key1 & 0xFFF));
-		unsigned __int64 v10 = (unsigned int)v9 | v9 & 0xFFFFFFFF00000000ui64 ^ ((unsigned __int64)((unsigned int)v9 + 0x71747EF8) << 0x20);
-		unsigned __int64 v11 = Key2 ^ ((unsigned int)v9 | v10 & 0xFFFFFFFF00000000ui64 ^ ((unsigned __int64)(unsigned int)(v10 + __ROL4__(HIDWORD(dummy), 1)) << 0x20));
-		unsigned __int64 v12 = -(int)v7 & ((unsigned int)v11 | ((unsigned int)v11 | v11 & 0xFFFFFFFF00000000ui64 ^ ((unsigned __int64)((unsigned int)v11 ^ ~(unsigned int)dummy2) << 0x20)) & 0xFFFFFFFF00000000ui64 ^ ((unsigned __int64)((unsigned int)v11 ^ 0xDFBFA250) << 0x20));
+		auto dummy = SDK->RPM<_QWORD>(SDK->dwGameBase + 0x37743A0 + (Key1 >> 0x34));
+		auto dummy2 = SDK->RPM<_QWORD>(SDK->dwGameBase + 0x37743A0 + (Key1 & 0xFFF));
+		unsigned __int64 v10 = (unsigned int)v9 | v9 & 0xFFFFFFFF00000000ui64 ^ ((unsigned __int64)(2 * __ROR4__(dummy, 3) - (unsigned int)v9) << 32);
+		unsigned __int64 v11 = (Key2 ^ ((unsigned int)v9 | v10 & 0xFFFFFFFF00000000ui64 ^ ((unsigned __int64)(unsigned int)(v10 - HIDWORD(dummy2)) << 32))) & 0xFFFFFFFF00000000ui64;
+		unsigned __int64 v12 = -(int)v7 & ((unsigned int)Key2 ^ (unsigned int)v9 | ((unsigned int)Key2 ^ (unsigned int)v9 | v11 ^ ((unsigned __int64)(0xE41B5B4A - ((unsigned int)Key2 ^ (unsigned int)v9)) << 32)) & 0xFFFFFFFF00000000ui64 ^ ((unsigned __int64)(unsigned int)((Key2 ^ v9 | v11) - HIDWORD(dummy)) << 32));
+
 
 		return v12;
 	}
@@ -338,7 +339,7 @@ namespace OW {
 
 		v2 = (SDK->dwGameBase + offset::VisFN);
 		v3 = v2 + 0x8;
-		v4 = SDK->RPM<_QWORD>(SDK->dwGameBase + 0x389A700 + 8ull * (((uint8_t)a1 - 0x46) & 0x7F) //a1 +- offset
+		v4 = SDK->RPM<_QWORD>(SDK->dwGameBase + 0x37753C0 + 8ull * (((uint8_t)a1 + 0x58) & 0x7F) //a1 +- offset
 			+ (((unsigned __int64)(a1 + offset::Vis_Key) >> 7) & 7)) ^ v2 ^ (a1 + offset::Vis_Key); // a1 +- viskey1
 		v5 = 0i64;
 		v6 = (v3 - v2 + 7) >> 3;
@@ -363,7 +364,7 @@ namespace OW {
 		}
 		for (; v2 < v3; v2 += 8i64)
 			v4 ^= SDK->RPM<_QWORD>(v2);
-		return v4 ^ ~v3 ^ 0x1AAC46FF0D473EBA; //viskey 2
+		return v4 ^ ~v3 ^ 0x5AE142A313A92858; //viskey 2
 	}
 
 	uintptr_t GetHeapManager(uint8_t index) {
@@ -750,8 +751,8 @@ namespace OW {
 		v2 = (SDK->dwGameBase + offset::OutlineFN);
 		v3 = v2 + 0x8;
 		v4 = 0i64;
-		v5 = SDK->RPM<uintptr_t>(SDK->dwGameBase + 0x389A700 + 8ull * (((uint8_t)a1 - 0x2) & 0x7F) //a1 +- offset
-			+ (((unsigned __int64)(a1 + offset::Outline_Key) >> 7) & 7)) ^ v2 ^ (a1 + offset::Outline_Key); // a1 +- outline key1
+		v5 = SDK->RPM<uintptr_t>(SDK->dwGameBase + 0x37753C0 + 8ull * (((uint8_t)a1 - 0x37) & 0x7F) //a1 +- offset
+			+ (((unsigned __int64)(a1 - offset::Outline_Key) >> 7) & 7)) ^ v2 ^ (a1 - offset::Outline_Key); // a1 +- outline key1
 		v6 = (v3 - v2 + 7) >> 3;
 		if (v2 > v3)
 			v6 = 0i64;
@@ -774,7 +775,7 @@ namespace OW {
 		}
 		for (; v2 < v3; v2 += 8i64)
 			v5 ^= SDK->RPM<_QWORD>(v2);
-		return v5 ^ ~v3 ^ 0x6F3C13FEBA1E4DFE; //outline key 2
+		return v5 ^ ~v3 ^ 0x97b86fc1e421a5c9i64; //outline key 2
 	}
 
 	inline void SetBorderLine(uint32_t BorderType, DWORD_PTR base)

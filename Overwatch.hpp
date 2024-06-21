@@ -8,7 +8,7 @@
 #include "simhei.h"
 #include "imgui-knobs.h"
 #include "icon.h"
-#define M_PI        3.14159265358979323846f
+//#define M_PI        3.14159265358979323846f
 #define M_RADPI        57.295779513082f
 #define M_PI_F        ((float)(M_PI))
 #define RAD2DEG( x  )  ( (float)(x) * (float)(180.f / M_PI_F) )
@@ -2890,13 +2890,7 @@ namespace OW {
 
 					else if (Config::AutoHookRoad && local_entity.HeroID == eHero::HERO_ROADHOG)
 					{
-						if (Config::hitboxdelayshoot) {
-							if (Config::shooted || !GetAsyncKeyState(Config::aim_key)) {
-								dodelay = 1;
-								hitbotdelaytime = 0;
-							}
-						}
-						while (GetAsyncKeyState(Config::aim_key) && !Config::shooted)
+						while (GetAsyncKeyState(Config::aim_key))
 						{
 							auto vec = GetVector3(true);
 							if (vec == Vector3(0, 0, 0)) {
@@ -2905,94 +2899,24 @@ namespace OW {
 							if (vec != Vector3(0, 0, 0) && !(entities[Config::Targetenemyi].skill2act && entities[Config::Targetenemyi].HeroID == eHero::HERO_GENJI) && ((!entities[Config::Targetenemyi].imort && !entities[Config::Targetenemyi].barrprot) || Config::switch_team))
 							{
 								float dist = Vector3(viewMatrix_xor.get_location().x, viewMatrix_xor.get_location().y, viewMatrix_xor.get_location().z).DistTo(vec);
-								if (dist <= 20)
-								{
-
+								//real max distance is 20
+								if (dist <= 19) {
 									auto local_angle = SDK->RPM<Vector3>(SDK->g_player_controller + 0x1170);
 									auto calc_target = CalcAngle(XMFLOAT3(vec.X, vec.Y, vec.Z), viewMatrix_xor.get_location());
 									auto vec_calc_target = Vector3(calc_target.x, calc_target.y, calc_target.z);
 									auto Target = SmoothAccelerate(local_angle, vec_calc_target, Config::Flick_smooth / 10.f, Config::accvalue);
 									auto local_loc = Vector3(viewMatrix_xor.get_location().x, viewMatrix_xor.get_location().y, viewMatrix_xor.get_location().z);
-									if (dodelay && !Config::doingdelay) {
-										hitbotdelaytime = GetTickCount();
-										dodelay = 0;
-									}
-									if (Target != Vector3(0, 0, 0)) {
-										if (Config::hitboxdelayshoot && hitbotdelaytime != 0) {
-											afterdelaytime = GetTickCount();
-											if (afterdelaytime - hitbotdelaytime > Config::hiboxdelaytime && !Config::doingdelay) {
-												SetKeyHold(0x8, 100);
-												Config::shooted = true;
-												continue;
-											}
-										}
-
-										if (Config::targetdelay) {
-											if (Config::lastenemy != Config::Targetenemyi)  Config::doingdelay = 1;
-											if (Config::doingdelay == 1) {
-												Config::lastenemy = Config::Targetenemyi;
-												if (Config::timebeforedelay == 0) {
-													Config::timebeforedelay = GetTickCount();
-													continue;
-												}
-												if (GetTickCount() - Config::timebeforedelay < Config::targetdelaytime) continue;
-												else Config::timebeforedelay = 0;
-												Config::doingdelay = 0;
-												hitbotdelaytime = GetTickCount();
-											}
-										}
-										else if (Config::doingdelay) Config::doingdelay = 0;
-										SDK->WPM<Vector3>(SDK->g_player_controller + 0x1170, Target);
-										if (in_range(local_angle, vec_calc_target, local_loc, vec, Config::hitbox)) {
-											if (Config::lockontarget) SDK->WPM<float>(GetSenstivePTR(), 0);
-											SetKeyHold(0x8, 100);
-											Sleep(1);
-											if (Config::dontshot) Config::shotcount++;
-											if (Config::lockontarget) SDK->WPM<float>(GetSenstivePTR(), origin_sens);
-											Config::shooted = true;
-										}
-										else if (Config::dontshot && Config::shotcount >= Config::shotmanydont) {
-											if (in_range(local_angle, vec_calc_target, local_loc, vec, Config::missbox)) {
-												Config::shotcount = 0;
-												SetKeyHold(0x8, 100);
-												Config::shooted = true;
-												continue;
-											}
-										}
-									}
-									else hitbotdelaytime = 0;
-								}
-								Sleep(1);
-								if (Config::autoscalefov) {
-									auto vec = GetVector3forfov();
-									if (vec != Vector3(0, 0, 0)) {
-										Vector2 high;
-										Vector2 low;
-										if (viewMatrix.WorldToScreen(entities[Config::Targetenemyifov].head_pos, &high, Vector2(WX, WY)) && viewMatrix.WorldToScreen(entities[Config::Targetenemyifov].chest_pos, &low, Vector2(WX, WY)))
-										{
-											Config::Fov = -(high.Y - low.Y) * 4;
-											if (Config::Fov > 500) Config::Fov = 500;
-											else if (Config::Fov < Config::minFov1) Config::Fov = Config::minFov1;
-											Config::Fov2 = -(high.Y - low.Y) * 4;
-											if (Config::Fov2 > 500) Config::Fov2 = 500;
-											else if (Config::Fov2 < Config::minFov2) Config::Fov2 = Config::minFov2;
-										}
-										else
-										{
-											Config::Fov = Config::minFov1;
-											Config::Fov2 = Config::minFov2;
-										}
-
-									}
-									else
-									{
-										Config::Fov = Config::minFov1;
-										Config::Fov2 = Config::minFov2;
+									//aim at the target
+									SDK->WPM<Vector3>(SDK->g_player_controller + 0x1170, Target);
+									if (in_range(local_angle, vec_calc_target, local_loc, vec, 1)) {
+										SetKeyHold(0x8, 100);
 									}
 								}
 							}
+							Sleep(10);
 						}
 					}
+
 					if (Config::GenjiBlade && GetAsyncKeyState(0x51) && local_entity.HeroID == eHero::HERO_GENJI && local_entity.ultimate == 100) {
 						Config::Qstarttime = GetTickCount();
 						Config::Qtime = Config::Qstarttime;
@@ -3135,33 +3059,6 @@ namespace OW {
 						}
 					}
 
-
-					/*if (Config::AutoHookRoad && local_entity.HeroID == eHero::HERO_ROADHOG) {
-						while (GetAsyncKeyState(Config::aim_key)) { //loop while aim key is held down, can change it and add a second key entirely
-							auto vec = GetVector3(false);
-							if (vec != Vector3(0, 0, 0) && !entities[Config::Targetenemyi].imort && !entities[Config::Targetenemyi].barrprot && entities[Config::Targetenemyi].Team) {
-								float dist = Vector3(viewMatrix_xor.get_location().x, viewMatrix_xor.get_location().y, viewMatrix_xor.get_location().z).DistTo(vec);
-								if (dist <= 19) { //!local_entity.skillcd1 not working, SkillBase + 0x40, 0, 0x????
-									auto local_angle = SDK->RPM<Vector3>(SDK->g_player_controller + 0x1170);
-									auto calc_target = CalcAngle(XMFLOAT3(vec.X, vec.Y, vec.Z), viewMatrix_xor.get_location());
-									auto vec_calc_target = Vector3(calc_target.x, calc_target.y, calc_target.z);
-									auto Target = SmoothAccelerate(local_angle, vec_calc_target, Config::Flick_smooth / 10.f, Config::accvalue);
-									// SmoothAccelerate(local_angle, vec_calc_target, Config::Flick_smooth / 10.f, Config::accvalue);
-									// SmoothLinear(local_angle, vec_calc_target, Config::Tracking_smooth / 10.f);
-									auto local_loc = Vector3(viewMatrix_xor.get_location().x, viewMatrix_xor.get_location().y, viewMatrix_xor.get_location().z);
-
-									//aim at the target
-									SDK->WPM<Vector3>(SDK->g_player_controller + 0x1170, Target);
-
-									if (in_range(local_angle, vec_calc_target, local_loc, vec, 1)) {
-										SetKeyHold(0x8, 100); //having it hold the key so it doesn't interrupt aimbot thread
-										//isHookOnCooldown logic; SkillBase + 0x40, 0, 0x???
-									}
-								}
-							}
-							Sleep(10); //small delay for CPU usage
-						}
-					}*/
 
 
 					if (Config::AutoSkill) {
@@ -3325,10 +3222,10 @@ namespace OW {
 						Config::Targetenemyi = -1;
 					}
 					//reaper reload animation cancel, doesn't really speed it up though
-					if (local_entity.HeroID == eHero::HERO_REAPER && Config::reloading) {
+					/*if (local_entity.HeroID == eHero::HERO_REAPER && Config::reloading) {
 						Sleep(300);
 						SetKey(0x800);
-					}
+					}*/
 
 					if (Config::secondaim) {
 						while (GetAsyncKeyState(Config::aim_key2) && !Config::shooted2)
