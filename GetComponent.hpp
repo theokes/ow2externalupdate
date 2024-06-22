@@ -314,8 +314,8 @@ namespace OW {
 		unsigned __int64 v9 = SDK->RPM<uintptr_t>((SDK->RPM<uintptr_t>((v1 + 0x80)) + 8 * (SDK->RPM<uint8_t>(((uint32_t)v5 + v1 + 0x130)) + ((0x101010101010101 * (((v8 & 0x3333333333333333) + ((v8 >> 2) & 0x3333333333333333) + (((v8 & 0x3333333333333333) + ((v8 >> 2) & 0x3333333333333333)) >> 4)) & 0xF0F0F0F0F0F0F0F)) >> 0x38))));
 		unsigned __int64 Key1 = SDK->GlobalKey1;
 		unsigned __int64 Key2 = SDK->GlobalKey2;
-		auto dummy = SDK->RPM<_QWORD>(SDK->dwGameBase + 0x37743A0 + (Key1 >> 0x34));
-		auto dummy2 = SDK->RPM<_QWORD>(SDK->dwGameBase + 0x37743A0 + (Key1 & 0xFFF));
+		auto dummy = SDK->RPM<_QWORD>(SDK->dwGameBase + 0x37C9320 + (Key1 >> 0x34));
+		auto dummy2 = SDK->RPM<_QWORD>(SDK->dwGameBase + 0x37C9320 + (Key1 & 0xFFF));
 		unsigned __int64 v10 = (unsigned int)v9 | v9 & 0xFFFFFFFF00000000ui64 ^ ((unsigned __int64)(2 * __ROR4__(dummy, 3) - (unsigned int)v9) << 32);
 		unsigned __int64 v11 = (Key2 ^ ((unsigned int)v9 | v10 & 0xFFFFFFFF00000000ui64 ^ ((unsigned __int64)(unsigned int)(v10 - HIDWORD(dummy2)) << 32))) & 0xFFFFFFFF00000000ui64;
 		unsigned __int64 v12 = -(int)v7 & ((unsigned int)Key2 ^ (unsigned int)v9 | ((unsigned int)Key2 ^ (unsigned int)v9 | v11 ^ ((unsigned __int64)(0xE41B5B4A - ((unsigned int)Key2 ^ (unsigned int)v9)) << 32)) & 0xFFFFFFFF00000000ui64 ^ ((unsigned __int64)(unsigned int)((Key2 ^ v9 | v11) - HIDWORD(dummy)) << 32));
@@ -323,6 +323,34 @@ namespace OW {
 
 		return v12;
 	}
+	/*uint64_t DecryptComponent(uint64_t parent, uint8_t type)
+	{
+			uint64_t b1 = parent;
+			uint64_t b2 = (uint64_t)1 << (uint64_t)(type & 0x3F);
+			uint64_t b3 = b2 - 1;
+			uint64_t b4 = type & 0x3F;
+			uint64_t b5 = type / 0x3F;
+			uint64_t v10 = SDK->RPM<uint64_t>(b1 + 8i64 * b5 + 0x110);
+			uint64_t v11 = b3 & v10;
+			uint64_t v12 = (b2 & v10) >> b4;
+			uint64_t v13 = ((v11 - ((v11 >> 1) & 0x5555555555555555i64)) & 0x3333333333333333i64)
+				+ (((v11 - ((v11 >> 1) & 0x5555555555555555i64)) >> 2) & 0x3333333333333333i64);
+			uint64_t v14 = 0x101010101010101i64 * ((v13 + (v13 >> 4)) & 0xF0F0F0F0F0F0F0Fi64);
+			uint64_t v15 = SDK->RPM<uint8_t>(b5 + b1 + 0x130);
+			uint64_t v16 = SDK->RPM<uint64_t>(b1 + 0x80);
+			uint64_t v17 = v15 + HIBYTE(v14);
+			uint64_t key1 = SDK->GlobalKey1;
+			uint64_t Key2 = SDK->GlobalKey2;
+			uint64_t v18 = (unsigned int)SDK->RPM<uint64_t>(v16 + 8 * v17) | SDK->RPM<uint64_t>(v16 + 8 * v17) & 0xFFFFFFFF00000000ui64 ^ ((unsigned __int64)(2 * _rotr(SDK->RPM<uint64_t>(SDK->dwGameBase + 0x37C9320 + (key1 >> 52)), 3) - (unsigned int)SDK->RPM<uint64_t>(v16 + 8 * v17)) << 32);
+			uint64_t v19 = (unsigned int)v18 | v18 & 0xFFFFFFFF00000000ui64 ^ ((unsigned __int64)(unsigned int)(v18- HIDWORD(SDK->RPM<uint64_t>(SDK->dwGameBase + 0x37C9320 + (key1 & 0xFFF)))) << 32);
+			uint64_t v20 = (unsigned int)key2 ^ (unsigned int)v19 | (key2 ^ v19) & 0xFFFFFFFF00000000ui64 ^ ((unsigned __int64)(-467969206 - ((unsigned int)key2 ^ (unsigned int)v19)) << 32);
+			uint64_t component_base = -(int)v12 & ((unsigned int)v20 | v20 & 0xFFFFFFFF00000000ui64 ^ ((unsigned __int64)(unsigned int)(v20 - HIDWORD(SDK->RPM<uint64_t>(SDK->dwGameBase + 0x37C9320 + (key1 >> 52)))) << 32));
+
+			if (SDK->RPM<uint8_t>(component_base + 0x10) == type)
+				return component_base;
+
+		return 0;
+	}*/
 
 	inline unsigned __int64 __fastcall DecryptVis(unsigned __int64 a1)
 	{
@@ -339,7 +367,7 @@ namespace OW {
 
 		v2 = (SDK->dwGameBase + offset::VisFN);
 		v3 = v2 + 0x8;
-		v4 = SDK->RPM<_QWORD>(SDK->dwGameBase + 0x37753C0 + 8ull * (((uint8_t)a1 + 0x58) & 0x7F) //a1 +- offset
+		v4 = SDK->RPM<_QWORD>(SDK->dwGameBase + 0x37CA340 + 8ull * (((uint8_t)a1 + 0x58) & 0x7F) //a1 +- offset
 			+ (((unsigned __int64)(a1 + offset::Vis_Key) >> 7) & 7)) ^ v2 ^ (a1 + offset::Vis_Key); // a1 +- viskey1
 		v5 = 0i64;
 		v6 = (v3 - v2 + 7) >> 3;
@@ -751,7 +779,7 @@ namespace OW {
 		v2 = (SDK->dwGameBase + offset::OutlineFN);
 		v3 = v2 + 0x8;
 		v4 = 0i64;
-		v5 = SDK->RPM<uintptr_t>(SDK->dwGameBase + 0x37753C0 + 8ull * (((uint8_t)a1 - 0x37) & 0x7F) //a1 +- offset
+		v5 = SDK->RPM<uintptr_t>(SDK->dwGameBase + 0x37CA340 + 8ull * (((uint8_t)a1 - 0x37) & 0x7F) //a1 +- offset
 			+ (((unsigned __int64)(a1 - offset::Outline_Key) >> 7) & 7)) ^ v2 ^ (a1 - offset::Outline_Key); // a1 +- outline key1
 		v6 = (v3 - v2 + 7) >> 3;
 		if (v2 > v3)

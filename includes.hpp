@@ -68,7 +68,7 @@ struct {\
 
 namespace OW {
 	auto viewMatrixVal = SDK->RPM<uint64_t>(SDK->dwGameBase + offset::Address_viewmatrix_base) ^ offset::offset_viewmatrix_xor_key;
-	Vector2 WindowSize = SDK->RPM<Vector2>(viewMatrixVal + 0x424); //0x41C
+	Vector2 WindowSize = SDK->RPM<Vector2>(viewMatrixVal + 0x41C);
 	float WX = WindowSize.X;
 	float WY = WindowSize.Y;
 
